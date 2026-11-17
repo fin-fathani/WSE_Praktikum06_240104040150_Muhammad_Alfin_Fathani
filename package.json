@@ -1,0 +1,20 @@
+{
+  "name": "praktikum06-keamanan-api-alfathani",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Praktikum 06 WSE Keamanan Web Service - Al-Fathani",
+  "scripts": {
+    "start": "node --env-file=.env server.cjs",
+    "docs": "node scripts/generate-openapi.cjs",
+    "testapi": "node --env-file=.env client.cjs",
+    "check": "node scripts/check-syntax.cjs",
+    "setup": "node scripts/setup-local.cjs"
+  },
+  "dependencies": {
+    "express": "5.3.0",
+    "swagger-ui-express": "5.0.1"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
+}

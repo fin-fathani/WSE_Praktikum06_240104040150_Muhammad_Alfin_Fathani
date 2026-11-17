@@ -1,0 +1,369 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Al-Fathani | Katalog Perpustakaan Praktikum 06",
+    "version": "1.0.0",
+    "description": "API pembelajaran lokal: API key, Bearer token opaque, scrypt, RBAC, dan TLS lokal. Bukan sistem produksi."
+  },
+  "servers": [
+    {
+      "url": "https://localhost:3443",
+      "description": "HTTPS lokal; sertifikat harus dipercaya oleh client"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ClientApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      },
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "opaque"
+      }
+    },
+    "schemas": {
+      "Book": {
+        "type": "object",
+        "required": [
+          "id",
+          "judul",
+          "tersedia"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "judul": {
+            "type": "string",
+            "example": "Dasar Web Service"
+          },
+          "tersedia": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "BookInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "judul",
+          "tersedia"
+        ],
+        "properties": {
+          "judul": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "tersedia": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Memeriksa server",
+        "responses": {
+          "200": {
+            "description": "Sehat"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login dan memperoleh Bearer token",
+        "security": [
+          {
+            "ClientApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token diterbitkan"
+          },
+          "400": {
+            "description": "Input tidak valid"
+          },
+          "401": {
+            "description": "Tidak terautentikasi"
+          },
+          "429": {
+            "description": "Terlalu banyak percobaan"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Mencabut token sesi",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Token dicabut"
+          },
+          "401": {
+            "description": "Tidak terautentikasi"
+          }
+        }
+      }
+    },
+    "/api/buku": {
+      "get": {
+        "summary": "Daftar buku (reader/admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 80
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar buku"
+          },
+          "400": {
+            "description": "Input tidak valid"
+          },
+          "401": {
+            "description": "Tidak terautentikasi"
+          }
+        }
+      },
+      "post": {
+        "summary": "Tambah buku (admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "judul",
+                  "tersedia"
+                ],
+                "properties": {
+                  "judul": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "tersedia": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Buku dibuat; header Location"
+          },
+          "400": {
+            "description": "Input tidak valid"
+          },
+          "401": {
+            "description": "Tidak terautentikasi"
+          },
+          "403": {
+            "description": "Tidak memiliki izin"
+          },
+          "413": {
+            "description": "Body terlalu besar"
+          },
+          "415": {
+            "description": "Tipe body tidak didukung"
+          }
+        }
+      }
+    },
+    "/api/buku/{id}": {
+      "get": {
+        "summary": "Detail buku (reader/admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detail"
+          },
+          "400": {
+            "description": "Input tidak valid"
+          },
+          "401": {
+            "description": "Tidak terautentikasi"
+          },
+          "404": {
+            "description": "Buku tidak ditemukan"
+          }
+        }
+      },
+      "put": {
+        "summary": "Ganti buku (admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "judul",
+                  "tersedia"
+                ],
+                "properties": {
+                  "judul": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "tersedia": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Diperbarui"
+          },
+          "400": {
+            "description": "Input tidak valid"
+          },
+          "401": {
+            "description": "Tidak terautentikasi"
+          },
+          "403": {
+            "description": "Tidak memiliki izin"
+          },
+          "404": {
+            "description": "Buku tidak ditemukan"
+          },
+          "413": {
+            "description": "Body terlalu besar"
+          },
+          "415": {
+            "description": "Tipe body tidak didukung"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Hapus buku (admin)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Terhapus"
+          },
+          "400": {
+            "description": "Input tidak valid"
+          },
+          "401": {
+            "description": "Tidak terautentikasi"
+          },
+          "403": {
+            "description": "Tidak memiliki izin"
+          },
+          "404": {
+            "description": "Buku tidak ditemukan"
+          }
+        }
+      }
+    }
+  }
+}

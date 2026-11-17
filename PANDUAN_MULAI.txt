@@ -1,0 +1,20 @@
+AL-FATHANI LIBRARY SECURITY — MULAI DI WINDOWS
+================================================
+1. Ekstrak ZIP.
+2. VS Code > File > Open Folder > pilih praktikum06-keamanan-api.
+3. Terminal PowerShell (boleh):
+   npm.cmd install
+   npm.cmd run setup
+   npm.cmd run docs
+   npm.cmd run check
+   npm.cmd start
+4. Buka https://localhost:3443/ pada browser.
+5. .env lokal berisi API_KEY, ADMIN_PASSWORD, READER_PASSWORD.
+   Gunakan hanya di komputer sendiri; JANGAN kirim/screenshot .env.
+6. Terminal kedua:
+   $env:NODE_EXTRA_CA_CERTS = (Resolve-Path '.\certs\localhost.crt').Path
+   npm.cmd run testapi
+7. Ambil screenshot terpilih tanpa kredensial, kirim hasil untuk laporan.
+
+Catatan: browser dapat mengingatkan sertifikat self-signed. Ikuti README untuk
+prosedur aman. package-lock.json terbuat otomatis saat npm.cmd install.
